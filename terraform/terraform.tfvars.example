@@ -1,8 +1,0 @@
-# ─── Terraform Variables ─────────────────────────────────
-# Copy this file to terraform.tfvars and fill in your values.
-# The .tfvars file is gitignored — never commit credentials.
-
-proxmox_api_url   = "https://10.0.0.1:8006"
-proxmox_api_token = "terraform@pve!tofu=CHANGE-ME-your-api-token-secret"
-proxmox_node      = "pve"
-ssh_public_key    = "ssh-ed25519 AAAA... your-key-comment"

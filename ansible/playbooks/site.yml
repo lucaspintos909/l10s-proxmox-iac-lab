@@ -1,9 +1,0 @@
----
-# ─── Master Playbook ─────────────────────────────────────
-# Runs all playbooks in the correct order.
-
-- name: Configure docker hosts
-  import_playbook: docker-host.yml
-
-- name: Configure monitoring
-  import_playbook: monitoring.yml
