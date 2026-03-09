@@ -1,0 +1,12 @@
+---
+# ─── Monitoring Playbook ─────────────────────────────────
+# Configures the monitoring LXC container.
+
+- name: Configure monitoring
+  hosts: monitoring
+  become: true
+
+  roles:
+    - common
+    - docker
+    - uptime_kuma

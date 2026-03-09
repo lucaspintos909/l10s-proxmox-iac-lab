@@ -1,0 +1,29 @@
+---
+# ─── Shared Variables ────────────────────────────────────
+# Used across all roles and playbooks.
+
+# Timezone
+timezone: "America/Montevideo"
+
+# Base domain for Traefik routing
+domain: "lab.local"
+
+# Docker network used by all services behind Traefik
+docker_network: "proxy"
+
+# Traefik
+traefik_dashboard_port: 8080
+
+# Gitea
+gitea_http_port: 3000
+gitea_ssh_port: 2222
+gitea_github_mirror_repo: ""  # Set to your GitHub repo URL to enable mirror
+
+# Vaultwarden
+vaultwarden_port: 8843
+
+# Portainer
+portainer_port: 9443
+
+# Uptime Kuma
+uptime_kuma_port: 3001

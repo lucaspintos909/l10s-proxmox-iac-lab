@@ -1,0 +1,30 @@
+---
+# ─── Vaultwarden Role ────────────────────────────────────
+# Deploys Vaultwarden as a Docker container behind Traefik.
+
+- name: Create Vaultwarden directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/vaultwarden
+    - /opt/vaultwarden/data
+
+- name: Create Vaultwarden docker-compose
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/vaultwarden/docker-compose.yml
+    mode: "0644"
+  notify: restart vaultwarden
+
+- name: Allow Vaultwarden port in UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ vaultwarden_port | string }}"
+    proto: tcp
+
+- name: Start Vaultwarden
+  community.docker.docker_compose_v2:
+    project_src: /opt/vaultwarden
+    state: present

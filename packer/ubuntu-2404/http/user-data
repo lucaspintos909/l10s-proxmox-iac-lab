@@ -1,0 +1,26 @@
+#cloud-config
+# Cloud-Init user-data for the golden image base configuration.
+# This runs ONCE when Packer builds the template.
+# Per-VM customization (hostname, IP, SSH keys) is handled by
+# Terraform's Cloud-Init integration at clone time.
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
+  - python3
+  - python3-pip
+  - curl
+  - wget
+  - vim
+  - htop
+  - net-tools
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - unattended-upgrades
+
+runcmd:
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent

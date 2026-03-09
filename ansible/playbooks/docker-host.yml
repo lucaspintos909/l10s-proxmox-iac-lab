@@ -1,0 +1,15 @@
+---
+# ─── Docker Host Playbook ────────────────────────────────
+# Configures the docker-host VM with all services.
+
+- name: Configure docker-host
+  hosts: docker_hosts
+  become: true
+
+  roles:
+    - common
+    - docker
+    - traefik
+    - gitea
+    - vaultwarden
+    - portainer

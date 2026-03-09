@@ -1,0 +1,10 @@
+---
+# ─── Encrypted Secrets ──────────────────────────────────
+# This file should be encrypted with ansible-vault.
+# Run: ansible-vault create group_vars/vault.yml
+#
+# Example contents (fill in your actual values):
+#
+# vault_gitea_db_password: "change-me"
+# vault_vaultwarden_admin_token: "change-me"
+# vault_traefik_dashboard_password: "change-me"

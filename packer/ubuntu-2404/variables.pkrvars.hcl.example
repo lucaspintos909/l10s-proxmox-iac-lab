@@ -1,0 +1,8 @@
+# ─── Packer Variables ────────────────────────────────────
+# Copy this file to variables.pkrvars.hcl and fill in your values.
+# The .pkrvars.hcl file is gitignored — never commit credentials.
+
+proxmox_api_url          = "https://10.0.0.1:8006/api2/json"
+proxmox_api_token_id     = "terraform@pve!packer"
+proxmox_api_token_secret = "CHANGE-ME-your-api-token-secret"
+proxmox_node             = "pve"
