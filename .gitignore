@@ -4,6 +4,7 @@
 # Custom gitignore
 secrets.pkrvars.hcl
 variables.pkrvars.hcl
+**/downloaded_iso_path
 
 ### DotfilesSh ###
 local-patch
