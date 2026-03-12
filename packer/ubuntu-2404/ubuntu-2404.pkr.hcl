@@ -72,6 +72,12 @@ variable "ssh_username" {
   default = "lpintos"
 }
 
+variable "ssh_private_key_file" {
+  type        = string
+  default     = "~/.ssh/id_ed25519"
+  description = "Path a la clave privada SSH que matchea con ssh_public_key"
+}
+
 variable "vm_ip" {
   type        = string
   default     = "10.0.0.100"
@@ -142,8 +148,10 @@ source "proxmox-iso" "ubuntu-2404" {
   cloud_init              = true
   cloud_init_storage_pool = "local-lvm"
 
-  ssh_username = var.ssh_username
-  ssh_timeout  = "20m"
+  ssh_host             = var.vm_ip
+  ssh_username         = var.ssh_username
+  ssh_private_key_file = var.ssh_private_key_file
+  ssh_timeout          = "20m"
 
   # Cloud-init config via CD-ROM (no requiere red entre laptop y VM)
   additional_iso_files {
