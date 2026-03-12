@@ -1,0 +1,47 @@
+auto lo
+iface lo inet loopback
+
+# Interfaz Cableada (Emergencia)
+iface nic0 inet manual
+
+# INTERFAZ WIFI (Uplink principal)
+auto wlp0s20f3
+iface wlp0s20f3 inet static
+    address 192.168.1.200/24
+    gateway 192.168.1.1
+    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+
+# BRIDGE 0: DMZ
+auto vmbr0
+iface vmbr0 inet static
+    address 10.0.0.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+    # NAT para internet
+    post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+    post-up   iptables -t nat -A POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE
+
+# BRIDGE 1: Proyectos
+auto vmbr1
+iface vmbr1 inet static
+    address 10.1.0.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    # NAT para que las APIs puedan bajar dependencias
+    post-up   iptables -t nat -A POSTROUTING -s '10.1.0.0/24' -o wlp0s20f3 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s '10.1.0.0/24' -o wlp0s20f3 -j MASQUERADE
+
+# BRIDGE 2: Lab tools
+auto vmbr2
+iface vmbr2 inet static
+    address 10.2.0.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+    # NAT para herramientas
+    post-up   iptables -t nat -A POSTROUTING -s '10.2.0.0/24' -o wlp0s20f3 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s '10.2.0.0/24' -o wlp0s20f3 -j MASQUERADE
