@@ -112,6 +112,7 @@ source "proxmox-iso" "ubuntu-2404" {
   vm_id                = var.vm_id
   vm_name              = var.template_name
   template_description = "Ubuntu 24.04 LTS image — built with Packer"
+  onboot               = true
 
   # ── Opción A: ISO local (activa) ──
   boot_iso {
