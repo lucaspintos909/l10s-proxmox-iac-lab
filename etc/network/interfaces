@@ -19,7 +19,7 @@ iface vmbr0 inet static
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes
-    # NAT para internet
+    # DMZ
     post-up echo 1 > /proc/sys/net/ipv4/ip_forward
     post-up   iptables -t nat -A POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE
     post-down iptables -t nat -D POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE
@@ -31,7 +31,7 @@ iface vmbr1 inet static
     bridge-ports none
     bridge-stp off
     bridge-fd 0
-    # NAT para que las APIs puedan bajar dependencias
+    # Proyectos
     post-up   iptables -t nat -A POSTROUTING -s '10.1.0.0/24' -o wlp0s20f3 -j MASQUERADE
     post-down iptables -t nat -D POSTROUTING -s '10.1.0.0/24' -o wlp0s20f3 -j MASQUERADE
 
@@ -42,6 +42,6 @@ iface vmbr2 inet static
     bridge-ports none
     bridge-stp off
     bridge-fd 0
-    # NAT para herramientas
+    # Lab tools
     post-up   iptables -t nat -A POSTROUTING -s '10.2.0.0/24' -o wlp0s20f3 -j MASQUERADE
     post-down iptables -t nat -D POSTROUTING -s '10.2.0.0/24' -o wlp0s20f3 -j MASQUERADE

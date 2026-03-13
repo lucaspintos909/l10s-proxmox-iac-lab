@@ -80,6 +80,14 @@ crash.log
 # ignore temporary output files
 output-*/
 
+### Terraform ###
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform.lock.hcl
+
 ### SSH ###
 **/.ssh/id_*
 **/.ssh/*_id_*
