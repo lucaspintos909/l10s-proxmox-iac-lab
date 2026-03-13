@@ -39,6 +39,12 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   initialization {
+    datastore_id = var.datastore_id
+
+    dns {
+      servers = ["1.1.1.1", "8.8.8.8"]
+    }
+
     dynamic "ip_config" {
       for_each = var.network_interfaces
       content {

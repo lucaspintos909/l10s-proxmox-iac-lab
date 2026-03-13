@@ -3,7 +3,7 @@ module "traefik_vm" {
 
   name          = "traefik-edge"
   node_name     = var.proxmox_node
-  description   = "VM de Gestión - Traefik y Cloudflared (DMZ + Internal)"
+  description   = "VM de Gestión - Traefik y Cloudflared"
   vm_id         = 100
   template_vmid = 9000
   
@@ -16,19 +16,19 @@ module "traefik_vm" {
 
   network_interfaces = [
     {
-      bridge  = "vmbr1"
-      address = "10.0.0.10/24"
-      gateway = "10.0.0.1"
+      bridge  = "vmbr0"          # DMZ (Salida a internet)
+      address = "10.0.0.10/24"   # IP correcta para vmbr0
+      gateway = "10.0.0.1"       # Su única puerta de salida al mundo
     },
     {
-      bridge  = "vmbr2"
-      address = "10.1.0.10/24"
-      gateway = null
+      bridge  = "vmbr1"          # Red de Proyectos
+      address = "10.1.0.10/24"   # IP correcta para vmbr1
+      gateway = null             # SIN gateway para evitar ruteo asimétrico
+    },
+    {
+      bridge  = "vmbr2"          # Red de Herramientas
+      address = "10.2.0.10/24"   # IP correcta para vmbr2
+      gateway = null             # SIN gateway
     }
   ]
-}
-
-output "traefik_vm_ips" {
-  description = "Direcciones IP de la VM Traefik"
-  value       = module.traefik_vm.ipv4_addresses
 }
