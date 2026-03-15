@@ -6,9 +6,9 @@ module "traefik_vm" {
   description   = "VM de Gestión - Traefik y Cloudflared"
   vm_id         = 100
   template_vmid = 9000
-  
+
   cpu_cores = 2
-  memory    = 2048
+  memory    = 4096
   disk_size = 20
 
   ssh_username   = var.ssh_username
@@ -16,19 +16,19 @@ module "traefik_vm" {
 
   network_interfaces = [
     {
-      bridge  = "vmbr0"          # DMZ (Salida a internet)
-      address = "10.0.0.10/24"   # IP correcta para vmbr0
-      gateway = "10.0.0.1"       # Su única puerta de salida al mundo
+      bridge  = "vmbr0"        # DMZ (Salida a internet)
+      address = "10.0.0.10/24" # IP correcta para vmbr0
+      gateway = "10.0.0.1"     # Su única puerta de salida al mundo
     },
     {
-      bridge  = "vmbr1"          # Red de Proyectos
-      address = "10.1.0.10/24"   # IP correcta para vmbr1
-      gateway = null             # SIN gateway para evitar ruteo asimétrico
+      bridge  = "vmbr1"        # Red de Proyectos
+      address = "10.1.0.10/24" # IP correcta para vmbr1
+      gateway = null           # SIN gateway para evitar ruteo asimétrico
     },
     {
-      bridge  = "vmbr2"          # Red de Herramientas
-      address = "10.2.0.10/24"   # IP correcta para vmbr2
-      gateway = null             # SIN gateway
+      bridge  = "vmbr2"        # Red de Herramientas
+      address = "10.2.0.10/24" # IP correcta para vmbr2
+      gateway = null           # SIN gateway
     }
   ]
 }
