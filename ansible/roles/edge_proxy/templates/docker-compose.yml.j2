@@ -25,6 +25,9 @@ services:
       # servicios de la LAN puedan llegar a Traefik directamente)
       - "80:80"
       - "443:443"
+    environment:
+      # Necesario para el DNS Challenge de Let's Encrypt (certificados wildcard)
+      - CF_DNS_API_TOKEN={{ cloudflare_dns_api_token }}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/traefik.yml:ro
@@ -33,12 +36,15 @@ services:
     networks:
       - {{ docker_network_name }}
     labels:
-      # Dashboard de Traefik (accesible solo vía Tailscale/LAN)
+      # Dashboard de Traefik protegido con BasicAuth
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ domain }}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
+      # Middleware BasicAuth
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users={{ traefik_dashboard_auth }}"
 
 networks:
   {{ docker_network_name }}:
