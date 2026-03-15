@@ -1,0 +1,11 @@
+---
+# Variables por defecto del rol edge_proxy
+edge_stack_dir: /opt/edge_stack
+traefik_dynamic_dir: "{{ edge_stack_dir }}/traefik/dynamic"
+traefik_acme_dir: "{{ edge_stack_dir }}/traefik/acme"
+
+# Red Docker interna para el stack
+docker_network_name: edge_network
+
+# Dominio principal
+domain: lucaspintos.link

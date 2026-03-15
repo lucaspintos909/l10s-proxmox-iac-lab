@@ -1,0 +1,17 @@
+---
+# Playbook: Configurar la VM Edge (Traefik + Cloudflare Tunnel)
+# Uso: ansible-playbook playbooks/edge.yml
+
+- name: Configurar Edge Gateway (Traefik + Cloudflared)
+  hosts: edge
+  become: true
+
+  pre_tasks:
+    - name: Actualizar cache de APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+  roles:
+    - docker_setup
+    - edge_proxy

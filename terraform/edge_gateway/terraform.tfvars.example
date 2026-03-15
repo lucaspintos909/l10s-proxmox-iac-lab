@@ -1,0 +1,6 @@
+proxmox_api_url          = "https://100.68.137.21:8006/api2/json"
+proxmox_api_token_id     = "root@pam!packer-token"
+proxmox_api_token_secret = "CHANGE-ME-your-api-token-secret"
+proxmox_node             = "pve"
+ssh_username             = "lpintos"
+ssh_public_key           = "ssh-ed25519 AAAA... tu-clave-publica-aqui"

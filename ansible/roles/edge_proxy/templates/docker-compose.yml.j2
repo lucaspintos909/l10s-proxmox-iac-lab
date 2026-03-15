@@ -1,0 +1,51 @@
+# ─── Edge Stack: Traefik + Cloudflare Tunnel ─────────────────
+# Managed by Ansible — do not edit manually
+
+services:
+  # ── Cloudflare Tunnel ──────────────────────────────────────
+  # Crea un tunnel saliente hacia Cloudflare. No necesita puertos abiertos.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN={{ cloudflare_tunnel_token }}
+    networks:
+      - {{ docker_network_name }}
+
+  # ── Traefik Reverse Proxy ──────────────────────────────────
+  # Recibe tráfico de cloudflared y lo enruta a los servicios.
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      # Puerto 80 expuesto solo en la red interna (para que cloudflared y otros
+      # servicios de la LAN puedan llegar a Traefik directamente)
+      - "80:80"
+      - "443:443"
+    environment:
+      # Necesario para el DNS Challenge de Let's Encrypt (certificados wildcard)
+      - CF_DNS_API_TOKEN={{ cloudflare_dns_api_token }}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/traefik.yml:ro
+      - ./traefik/dynamic:/dynamic:ro
+      - ./traefik/acme:/acme
+    networks:
+      - {{ docker_network_name }}
+    labels:
+      # Dashboard de Traefik protegido con BasicAuth
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ domain }}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=cloudflare"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
+      # Middleware BasicAuth
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users={{ traefik_dashboard_auth }}"
+
+networks:
+  {{ docker_network_name }}:
+    external: true
