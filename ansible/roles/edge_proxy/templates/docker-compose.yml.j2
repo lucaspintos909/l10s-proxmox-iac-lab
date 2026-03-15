@@ -17,7 +17,7 @@ services:
   # ── Traefik Reverse Proxy ──────────────────────────────────
   # Recibe tráfico de cloudflared y lo enruta a los servicios.
   traefik:
-    image: traefik:v3.3
+    image: traefik:v3.6
     container_name: traefik
     restart: unless-stopped
     ports:
