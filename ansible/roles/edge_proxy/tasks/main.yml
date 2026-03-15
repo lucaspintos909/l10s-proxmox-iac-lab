@@ -1,0 +1,52 @@
+---
+# Role: edge_proxy
+# Despliega Traefik + Cloudflare Tunnel via Docker Compose
+
+- name: Crear directorios del edge stack
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ edge_stack_dir }}"
+    - "{{ traefik_dynamic_dir }}"
+    - "{{ traefik_acme_dir }}"
+
+- name: Crear archivo acme.json para certificados con permisos restrictivos
+  ansible.builtin.file:
+    path: "{{ traefik_acme_dir }}/acme.json"
+    state: touch
+    owner: root
+    group: root
+    mode: "0600"
+  changed_when: false
+
+- name: Generar configuración estática de Traefik
+  ansible.builtin.template:
+    src: traefik.yml.j2
+    dest: "{{ edge_stack_dir }}/traefik/traefik.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart edge stack
+
+- name: Generar docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ edge_stack_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart edge stack
+
+- name: Crear red Docker para el edge stack
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+    state: present
+
+- name: Levantar el edge stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ edge_stack_dir }}"
+    state: present

@@ -88,6 +88,11 @@ output-*/
 !*.tfvars.example
 .terraform.lock.hcl
 
+### Ansible ###
+*.retry
+ansible/inventory/group_vars/*/secrets.yml
+!ansible/inventory/group_vars/*/secrets.yml.example
+
 ### SSH ###
 **/.ssh/id_*
 **/.ssh/*_id_*
