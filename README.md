@@ -39,7 +39,7 @@ Copia esta estructura para organizar tus archivos de configuración:
 │   │   └── secrets.pkrvars.hcl  # LLAVES SSH (IGNORAR EN GIT)
 ├── terraform/
 │   ├── modules/                 # Módulos reutilizables para crear VMs
-│   ├── network-vm/              # Despliegue de la VM de Traefik
+│   ├── edge-gateway/            # Despliegue de la VM de Traefik
 │   └── apps-vms/                # Despliegue de Gitea, Jenkins, AdGuard, etc.
 ├── ansible/                     # Playbooks para configurar software dentro de las VMs
 ├── compose/                     # Archivos Docker Compose (Traefik, Cloudflared)
