@@ -1,0 +1,17 @@
+---
+# Playbook: Instalar AdGuard Home en el contenedor LXC DNS
+# Uso: ansible-playbook playbooks/adguard.yml
+
+- name: Instalar AdGuard Home (Split-Brain DNS)
+  hosts: adguard-dns
+  gather_facts: true
+  become: true
+
+  pre_tasks:
+    - name: Actualizar cache de APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+  roles:
+    - adguard_setup

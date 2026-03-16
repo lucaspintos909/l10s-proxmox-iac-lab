@@ -1,0 +1,39 @@
+---
+# Role: adguard_setup
+# Instala AdGuard Home desde su binario oficial y lo registra como servicio systemd
+
+- name: Crear directorio /opt/AdGuardHome
+  ansible.builtin.file:
+    path: /opt/AdGuardHome
+    state: directory
+    mode: "0755"
+
+- name: Verificar si AdGuard Home ya está instalado
+  ansible.builtin.stat:
+    path: /opt/AdGuardHome/AdGuardHome
+  register: adguard_binary
+
+- name: Descargar y extraer binario de AdGuard Home
+  ansible.builtin.unarchive:
+    src: https://static.adguard.com/adguardhome/release/AdGuardHome_linux_amd64.tar.gz
+    dest: /opt/
+    remote_src: true
+  when: not adguard_binary.stat.exists
+
+- name: Verificar si el servicio ya está registrado
+  ansible.builtin.stat:
+    path: /etc/systemd/system/AdGuardHome.service
+  register: adguard_service
+
+- name: Instalar AdGuard Home como servicio de systemd
+  ansible.builtin.command:
+    cmd: /opt/AdGuardHome/AdGuardHome -s install
+  when: not adguard_service.stat.exists
+  changed_when: true
+
+- name: Asegurar que el servicio AdGuardHome esté habilitado y corriendo
+  ansible.builtin.systemd:
+    name: AdGuardHome
+    enabled: true
+    state: started
+    daemon_reload: true
