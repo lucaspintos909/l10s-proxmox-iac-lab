@@ -1,10 +1,9 @@
-# ─── Template LXC de Ubuntu 24.04 ────────────────────────────
-# El provider descarga automáticamente el template si no existe en el storage.
+# ─── Template LXC de Ubuntu 24.04 (Oficial de Proxmox) ───────────────
 resource "proxmox_virtual_environment_download_file" "ubuntu_2404_lxc" {
   content_type = "vztmpl"
   datastore_id = "local"
   node_name    = var.proxmox_node
-  url          = "https://images.linuxcontainers.org/images/ubuntu/noble/amd64/default/20250314_07%3A42/rootfs.tar.xz"
+  url          = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
 }
 
 # ─── Contenedor LXC: AdGuard Home (Split-Brain DNS) ──────────
