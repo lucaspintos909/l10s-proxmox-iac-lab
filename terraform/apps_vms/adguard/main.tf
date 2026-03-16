@@ -9,7 +9,7 @@ module "adguard_vm" {
 
   cpu_cores = 1
   memory    = 1024
-  disk_size = 15
+  disk_size = 20
 
   ssh_username   = var.ssh_username
   ssh_public_key = var.ssh_public_key
