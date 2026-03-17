@@ -11,7 +11,7 @@ iface wlp0s20f3 inet static
     gateway 192.168.1.1
     wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
 
-# BRIDGE 0: DMZ
+# BRIDGE 0: Edge Network (Public Ingress)
 auto vmbr0
 iface vmbr0 inet static
     address 10.0.0.1/24
@@ -19,7 +19,7 @@ iface vmbr0 inet static
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes
-    # DMZ
+    # Edge Network (Public Ingress)
     post-up echo 1 > /proc/sys/net/ipv4/ip_forward
     post-up   iptables -t nat -A POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE
     post-down iptables -t nat -D POSTROUTING -s '10.0.0.0/24' -o wlp0s20f3 -j MASQUERADE

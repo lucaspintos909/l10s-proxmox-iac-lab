@@ -16,7 +16,7 @@ module "traefik_vm" {
 
   network_interfaces = [
     {
-      bridge  = "vmbr0"        # DMZ (Salida a internet)
+      bridge  = "vmbr0"        # Edge Network (Public Ingress)
       address = "10.0.0.10/24" # IP correcta para vmbr0
       gateway = "10.0.0.1"     # Su única puerta de salida al mundo
     },
