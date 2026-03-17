@@ -20,6 +20,13 @@
     remote_src: true
   when: not adguard_binary.stat.exists
 
+- name: Desplegar configuración de AdGuard Home
+  ansible.builtin.template:
+    src: AdGuardHome.yaml.j2
+    dest: /opt/AdGuardHome/AdGuardHome.yaml
+    mode: "0644"
+  notify: Reiniciar AdGuardHome
+
 - name: Verificar si el servicio ya está registrado
   ansible.builtin.stat:
     path: /etc/systemd/system/AdGuardHome.service

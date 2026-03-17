@@ -41,6 +41,14 @@
     mode: "0644"
   notify: Restart edge stack
 
+- name: Desplegar configuración dinámica de AdGuard Home
+  ansible.builtin.template:
+    src: dynamic/adguard.yml.j2
+    dest: "{{ traefik_dynamic_dir }}/adguard.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Crear red Docker para el edge stack
   community.docker.docker_network:
     name: "{{ docker_network_name }}"

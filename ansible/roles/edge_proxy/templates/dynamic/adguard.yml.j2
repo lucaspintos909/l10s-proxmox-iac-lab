@@ -1,0 +1,18 @@
+# ─── Traefik Dynamic Configuration: AdGuard Home ─────────────
+# Managed by Ansible — do not edit manually
+
+http:
+  routers:
+    adguard:
+      rule: "Host(`adguard.{{ domain }}`)"
+      entryPoints:
+        - websecure
+      service: adguard
+      tls:
+        certResolver: cloudflare
+
+  services:
+    adguard:
+      loadBalancer:
+        servers:
+          - url: "http://10.2.0.11:80"

@@ -1,0 +1,7 @@
+---
+# Handlers del rol adguard_setup
+
+- name: Reiniciar AdGuardHome
+  ansible.builtin.systemd:
+    name: AdGuardHome
+    state: restarted

@@ -1,0 +1,5 @@
+---
+# Variables por defecto del rol adguard_setup
+domain: lucaspintos.link
+adguard_admin_user: admin
+adguard_edge_ip: "10.0.0.10"
