@@ -1,10 +1,4 @@
-# ─── Template LXC de Ubuntu 24.04 (Oficial de Proxmox) ───────────────
-resource "proxmox_virtual_environment_download_file" "ubuntu_2404_lxc" {
-  content_type = "vztmpl"
-  datastore_id = "local"
-  node_name    = var.proxmox_node
-  url          = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
-}
+
 
 # ─── Contenedor LXC: Gitea Server ──────────
 resource "proxmox_virtual_environment_container" "gitea" {
@@ -22,7 +16,7 @@ resource "proxmox_virtual_environment_container" "gitea" {
 
   # ── Sistema Operativo ──────────────────────────────────────
   operating_system {
-    template_file_id = proxmox_virtual_environment_download_file.ubuntu_2404_lxc.id
+    template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
     type             = "ubuntu"
   }
 
