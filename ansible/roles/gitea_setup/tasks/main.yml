@@ -1,4 +1,11 @@
 ---
+# 0. Instalar dependencias
+- name: Instalar paquetes requeridos (git, tzdata)
+  ansible.builtin.apt:
+    name:
+      - git
+      - tzdata
+    state: present
 # 1. Crear usuario git
 - name: Crear grupo {{ gitea_group }}
   ansible.builtin.group:

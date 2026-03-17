@@ -48,7 +48,6 @@
     owner: root
     group: root
     mode: "0644"
-  notify: Restart edge stack
 
 - name: Crear red Docker para el edge stack
   community.docker.docker_network:
