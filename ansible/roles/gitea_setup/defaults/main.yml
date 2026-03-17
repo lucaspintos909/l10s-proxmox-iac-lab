@@ -1,0 +1,9 @@
+---
+gitea_version: "1.23.2"  # Update to latest stable if needed
+gitea_arch: "linux-amd64"
+gitea_user: git
+gitea_group: git
+gitea_home: /var/lib/gitea
+gitea_config_dir: /etc/gitea
+gitea_log_dir: /var/log/gitea
+gitea_port: 3000

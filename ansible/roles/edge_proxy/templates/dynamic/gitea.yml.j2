@@ -1,0 +1,15 @@
+http:
+  routers:
+    gitea:
+      rule: "Host(`gitea.{{ domain }}`)"
+      entryPoints:
+        - "websecure"
+      service: "gitea-service"
+      tls:
+        certResolver: "cloudflare"
+
+  services:
+    gitea-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.2.0.12:3000"

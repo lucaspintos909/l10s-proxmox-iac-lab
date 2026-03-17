@@ -1,0 +1,6 @@
+---
+- name: Setup Gitea Server
+  hosts: gitea-server
+  become: true
+  roles:
+    - role: gitea_setup
