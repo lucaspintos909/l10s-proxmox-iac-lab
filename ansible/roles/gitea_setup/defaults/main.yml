@@ -1,5 +1,5 @@
 ---
-gitea_version: "1.23.2"  # Update to latest stable if needed
+gitea_version: "1.25.5"  # Update to latest stable if needed
 gitea_arch: "linux-amd64"
 gitea_user: git
 gitea_group: git
