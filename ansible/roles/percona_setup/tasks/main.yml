@@ -1,0 +1,68 @@
+---
+- name: Dependencias de sistema e instalación de Percona Server
+  block:
+    - name: Instalar pre-requisitos
+      ansible.builtin.apt:
+        name:
+          - gnupg2
+          - curl
+          - wget
+          - python3-pymysql  # Requerido por los módulos mysql_* de Ansible
+        state: present
+
+    - name: Descargar paquete percona-release
+      ansible.builtin.get_url:
+        url: https://repo.percona.com/apt/percona-release_latest.noble_all.deb
+        dest: /tmp/percona-release_latest.noble_all.deb
+        mode: '0644'
+
+    - name: Instalar paquete percona-release
+      ansible.builtin.apt:
+        deb: /tmp/percona-release_latest.noble_all.deb
+        state: present
+
+    - name: Configurar repositorio de ps-80 (Percona Server 8.0)
+      ansible.builtin.command: percona-release setup ps-80
+      args:
+        creates: /etc/apt/sources.list.d/percona-ps-80-release.list
+
+    - name: Actualizar cache de APT e instalar Percona Server
+      ansible.builtin.apt:
+        name: percona-server-server
+        state: present
+        update_cache: yes
+
+- name: Configurar Percona Server
+  block:
+    - name: Permitir conexiones externas (bind-address = 0.0.0.0)
+      ansible.builtin.lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address\s*='
+        line: 'bind-address = 0.0.0.0'
+        backup: yes
+      notify: Restart MySQL
+
+    - name: Asegurar que el servicio de MySQL está levantado y habilitado
+      ansible.builtin.systemd:
+        name: mysql
+        state: started
+        enabled: yes
+
+- name: Configurar Bases de Datos y Usuarios
+  block:
+    - name: Crear base de datos para Gitea ({{ gitea_db_name }})
+      community.mysql.mysql_db:
+        name: "{{ gitea_db_name }}"
+        encoding: utf8mb4
+        collation: utf8mb4_unicode_ci
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock # Usa autenticación root por socket por defecto en ubuntu
+
+    - name: Crear usuario de base de datos para Gitea
+      community.mysql.mysql_user:
+        name: "{{ gitea_db_user }}"
+        password: "{{ gitea_db_password }}"
+        host: "%"
+        priv: "{{ gitea_db_name }}.*:ALL"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock

@@ -1,0 +1,6 @@
+---
+# DB credentials for Gitea
+gitea_db_name: gitea_db
+gitea_db_user: gitea_user
+# IMPORTANTE: Reemplazar est valor por defecto inseguro en secrets.yml
+gitea_db_password: "CHANGEME_Gitea_Super_Secret_2026"

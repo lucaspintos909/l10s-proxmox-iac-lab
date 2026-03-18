@@ -1,0 +1,6 @@
+proxmox_api_url         = "https://10.X.X.X:8006/"
+proxmox_api_token_id     = "root@pam!terraform"
+proxmox_api_token_secret = "tu-secret-uuid"
+proxmox_node             = "pve"
+ssh_public_key           = "ssh-ed25519 AAAAC3... tu_usuario@host"
+lxc_root_password        = "P0t4t0..."
