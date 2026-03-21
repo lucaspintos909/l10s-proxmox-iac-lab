@@ -1,0 +1,45 @@
+---
+- name: Configurar mirrors de GitHub en Gitea
+  hosts: gitea-server
+  become: false
+
+  vars:
+    gitea_api_url: "http://localhost:3000"
+    gitea_admin_user: "lpintos"
+    gitea_mirrors:
+      - name: "l10s-proxmox-iac-lab"
+        clone_url: "https://github.com/lucaspintos909/l10s-proxmox-iac-lab"
+        mirror_interval: "1h"
+        description: "Mirror de GitHub: lucaspintos909/l10s-proxmox-iac-lab"
+
+  tasks:
+    - name: Verificar si los repos mirror ya existen
+      ansible.builtin.uri:
+        url: "{{ gitea_api_url }}/api/v1/repos/{{ gitea_admin_user }}/{{ item.name }}"
+        method: GET
+        url_username: "{{ gitea_admin_user }}"
+        url_password: "{{ gitea_admin_password }}"
+        force_basic_auth: true
+        status_code: [200, 404]
+      loop: "{{ gitea_mirrors }}"
+      register: gitea_mirror_check
+
+    - name: Crear mirrors (solo los que no existen)
+      ansible.builtin.uri:
+        url: "{{ gitea_api_url }}/api/v1/repos/migrate"
+        method: POST
+        url_username: "{{ gitea_admin_user }}"
+        url_password: "{{ gitea_admin_password }}"
+        force_basic_auth: true
+        body_format: json
+        body:
+          clone_addr: "{{ item.item.clone_url }}"
+          mirror: true
+          mirror_interval: "{{ item.item.mirror_interval }}"
+          repo_name: "{{ item.item.name }}"
+          description: "{{ item.item.description }}"
+          repo_owner: "{{ gitea_admin_user }}"
+          private: false
+        status_code: 201
+      loop: "{{ gitea_mirror_check.results }}"
+      when: item.status == 404
