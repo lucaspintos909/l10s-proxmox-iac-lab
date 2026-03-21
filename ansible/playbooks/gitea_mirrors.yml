@@ -9,8 +9,12 @@
     gitea_mirrors:
       - name: "l10s-proxmox-iac-lab"
         clone_url: "https://github.com/lucaspintos909/l10s-proxmox-iac-lab"
-        mirror_interval: "1h"
+        mirror_interval: "1m"
         description: "Mirror de GitHub: lucaspintos909/l10s-proxmox-iac-lab"
+      - name: "claude-wakeup"
+        clone_url: "https://github.com/lucaspintos909/claude-wakeup"
+        mirror_interval: "1m"
+        description: "Mirror de GitHub: lucaspintos909/claude-wakeup"
 
   tasks:
     - name: Verificar si los repos mirror ya existen
@@ -43,3 +47,17 @@
         status_code: 201
       loop: "{{ gitea_mirror_check.results }}"
       when: item.status == 404
+
+    - name: Actualizar intervalo de mirrors existentes
+      ansible.builtin.uri:
+        url: "{{ gitea_api_url }}/api/v1/repos/{{ gitea_admin_user }}/{{ item.item.name }}"
+        method: PATCH
+        url_username: "{{ gitea_admin_user }}"
+        url_password: "{{ gitea_admin_password }}"
+        force_basic_auth: true
+        body_format: json
+        body:
+          mirror_interval: "{{ item.item.mirror_interval }}"
+        status_code: 200
+      loop: "{{ gitea_mirror_check.results }}"
+      when: item.status == 200

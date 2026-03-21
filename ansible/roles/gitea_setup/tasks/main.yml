@@ -86,12 +86,18 @@
     gitea_lfs_jwt_secret:  "{{ gitea_generated_secrets.results[3].stdout }}"
   when: not gitea_appini_stat.stat.exists
 
-- name: Leer secrets existentes de app.ini (si ya existe)
+- name: Leer app.ini existente del servidor remoto
+  ansible.builtin.slurp:
+    src: "{{ gitea_config_dir }}/app.ini"
+  register: gitea_appini_content
+  when: gitea_appini_stat.stat.exists
+
+- name: Registrar secrets existentes como variables
   ansible.builtin.set_fact:
-    gitea_secret_key:     "{{ lookup('ini', 'SECRET_KEY section=security file=' + gitea_config_dir + '/app.ini') }}"
-    gitea_internal_token: "{{ lookup('ini', 'INTERNAL_TOKEN section=security file=' + gitea_config_dir + '/app.ini') }}"
-    gitea_jwt_secret:     "{{ lookup('ini', 'JWT_SECRET section=oauth2 file=' + gitea_config_dir + '/app.ini') }}"
-    gitea_lfs_jwt_secret: "{{ lookup('ini', 'LFS_JWT_SECRET section=server file=' + gitea_config_dir + '/app.ini') }}"
+    gitea_secret_key:     "{{ gitea_appini_content.content | b64decode | regex_search('SECRET_KEY\\s*=\\s*(\\S+)', '\\1') | first }}"
+    gitea_internal_token: "{{ gitea_appini_content.content | b64decode | regex_search('INTERNAL_TOKEN\\s*=\\s*(\\S+)', '\\1') | first }}"
+    gitea_jwt_secret:     "{{ gitea_appini_content.content | b64decode | regex_search('JWT_SECRET\\s*=\\s*(\\S+)', '\\1') | first }}"
+    gitea_lfs_jwt_secret: "{{ gitea_appini_content.content | b64decode | regex_search('LFS_JWT_SECRET\\s*=\\s*(\\S+)', '\\1') | first }}"
   when: gitea_appini_stat.stat.exists
 
 # 6. Desplegar app.ini

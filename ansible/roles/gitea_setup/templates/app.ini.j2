@@ -49,5 +49,8 @@ MODE      = file
 LEVEL     = info
 ROOT_PATH = {{ gitea_log_dir }}
 
+[mirror]
+MIN_INTERVAL = 1m
+
 [repository]
 ROOT = {{ gitea_home }}/repositories
