@@ -1,0 +1,143 @@
+---
+# 0. Instalar dependencias
+- name: Instalar paquetes requeridos (git, tzdata)
+  ansible.builtin.apt:
+    name:
+      - git
+      - tzdata
+    state: present
+
+# 1. Crear usuario git
+- name: Crear grupo {{ gitea_group }}
+  ansible.builtin.group:
+    name: "{{ gitea_group }}"
+    system: true
+    state: present
+
+- name: Crear usuario {{ gitea_user }}
+  ansible.builtin.user:
+    name: "{{ gitea_user }}"
+    group: "{{ gitea_group }}"
+    home: /home/{{ gitea_user }}
+    shell: /bin/bash
+    system: true
+    create_home: true
+    comment: "Git Version Control"
+    state: present
+
+# 2. Crear directorios para Gitea
+- name: Crear directorios requeridos
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default(gitea_group) }}"
+    mode: "{{ item.mode | default('0750') }}"
+  loop:
+    - { path: "{{ gitea_home }}", owner: "{{ gitea_user }}", mode: "0750" }
+    - { path: "{{ gitea_home }}/custom", owner: "{{ gitea_user }}", mode: "0750" }
+    - { path: "{{ gitea_home }}/data", owner: "{{ gitea_user }}", mode: "0750" }
+    - { path: "{{ gitea_home }}/log", owner: "{{ gitea_user }}", mode: "0750" }
+    - { path: "{{ gitea_home }}/repositories", owner: "{{ gitea_user }}", mode: "0750" }
+    - { path: "{{ gitea_config_dir }}", owner: "root", mode: "0770" }
+    - { path: "{{ gitea_log_dir }}", owner: "{{ gitea_user }}", mode: "0750" }
+
+# 3. Descargar Gitea
+- name: Descargar binario de Gitea ({{ gitea_version }})
+  ansible.builtin.get_url:
+    url: "https://dl.gitea.com/gitea/{{ gitea_version }}/gitea-{{ gitea_version }}-{{ gitea_arch }}"
+    dest: /usr/local/bin/gitea
+    mode: '0755'
+    owner: root
+    group: root
+  notify: Restart Gitea
+
+# 4. Configurar el servicio systemd
+- name: Generar archivo gitea.service
+  ansible.builtin.template:
+    src: gitea.service.j2
+    dest: /etc/systemd/system/gitea.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Gitea
+
+# 5. Generar o recuperar secrets para app.ini
+- name: Verificar si app.ini ya existe
+  ansible.builtin.stat:
+    path: "{{ gitea_config_dir }}/app.ini"
+  register: gitea_appini_stat
+
+- name: Generar secrets nuevos (solo si app.ini no existe)
+  ansible.builtin.command: /usr/local/bin/gitea generate secret {{ item }}
+  loop:
+    - SECRET_KEY
+    - INTERNAL_TOKEN
+    - JWT_SECRET
+    - LFS_JWT_SECRET
+  register: gitea_generated_secrets
+  when: not gitea_appini_stat.stat.exists
+
+- name: Registrar secrets generados como variables
+  ansible.builtin.set_fact:
+    gitea_secret_key:      "{{ gitea_generated_secrets.results[0].stdout }}"
+    gitea_internal_token:  "{{ gitea_generated_secrets.results[1].stdout }}"
+    gitea_jwt_secret:      "{{ gitea_generated_secrets.results[2].stdout }}"
+    gitea_lfs_jwt_secret:  "{{ gitea_generated_secrets.results[3].stdout }}"
+  when: not gitea_appini_stat.stat.exists
+
+- name: Leer secrets existentes de app.ini (si ya existe)
+  ansible.builtin.set_fact:
+    gitea_secret_key:     "{{ lookup('ini', 'SECRET_KEY section=security file=' + gitea_config_dir + '/app.ini') }}"
+    gitea_internal_token: "{{ lookup('ini', 'INTERNAL_TOKEN section=security file=' + gitea_config_dir + '/app.ini') }}"
+    gitea_jwt_secret:     "{{ lookup('ini', 'JWT_SECRET section=oauth2 file=' + gitea_config_dir + '/app.ini') }}"
+    gitea_lfs_jwt_secret: "{{ lookup('ini', 'LFS_JWT_SECRET section=server file=' + gitea_config_dir + '/app.ini') }}"
+  when: gitea_appini_stat.stat.exists
+
+# 6. Desplegar app.ini
+- name: Desplegar configuración app.ini
+  ansible.builtin.template:
+    src: app.ini.j2
+    dest: "{{ gitea_config_dir }}/app.ini"
+    owner: root
+    group: "{{ gitea_group }}"
+    mode: '0640'
+  notify: Restart Gitea
+  register: gitea_appini_deployed
+
+# 7. Habilitar e iniciar el servicio
+- name: Habilitar e iniciar el servicio gitea
+  ansible.builtin.systemd:
+    name: gitea
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# 8. Migrar base de datos (crear tablas)
+- name: Migrar base de datos de Gitea
+  ansible.builtin.command:
+    cmd: /usr/local/bin/gitea migrate --config {{ gitea_config_dir }}/app.ini
+  become_user: "{{ gitea_user }}"
+  when: gitea_appini_deployed.changed
+  environment:
+    GITEA_WORK_DIR: "{{ gitea_home }}"
+
+# 9. Crear usuario admin (idempotente)
+- name: Crear usuario admin de Gitea
+  ansible.builtin.command:
+    cmd: >
+      /usr/local/bin/gitea admin user create
+      --admin
+      --username {{ gitea_admin_user }}
+      --password {{ gitea_admin_password }}
+      --email {{ gitea_admin_email }}
+      --config {{ gitea_config_dir }}/app.ini
+  become_user: "{{ gitea_user }}"
+  register: gitea_admin_create
+  failed_when:
+    - gitea_admin_create.rc != 0
+    - "'user already exists' not in gitea_admin_create.stderr"
+  changed_when: gitea_admin_create.rc == 0
+  when: gitea_appini_deployed.changed
+  environment:
+    GITEA_WORK_DIR: "{{ gitea_home }}"

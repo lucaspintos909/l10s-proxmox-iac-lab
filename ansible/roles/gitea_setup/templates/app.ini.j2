@@ -1,0 +1,53 @@
+; Gitea configuration — gestionado por Ansible, no editar manualmente
+
+APP_NAME = Gitea
+RUN_USER = {{ gitea_user }}
+WORK_PATH = {{ gitea_home }}
+
+[database]
+DB_TYPE  = {{ gitea_db_type }}
+HOST     = {{ gitea_db_host }}
+NAME     = {{ gitea_db_name }}
+USER     = {{ gitea_db_user }}
+PASSWD   = {{ gitea_db_password }}
+SCHEMA   =
+CHARSET  = utf8mb4
+
+[server]
+PROTOCOL         = http
+DOMAIN           = {{ gitea_domain }}
+HTTP_ADDR        = 0.0.0.0
+HTTP_PORT        = {{ gitea_port }}
+ROOT_URL         = {{ gitea_root_url }}
+DISABLE_SSH      = false
+SSH_DOMAIN       = {{ gitea_domain }}
+SSH_PORT         = 22
+START_SSH_SERVER = false
+LFS_START_SERVER = true
+LFS_JWT_SECRET   = {{ gitea_lfs_jwt_secret }}
+
+[security]
+INSTALL_LOCK        = true
+SECRET_KEY          = {{ gitea_secret_key }}
+INTERNAL_TOKEN      = {{ gitea_internal_token }}
+
+[oauth2]
+JWT_SECRET = {{ gitea_jwt_secret }}
+
+[service]
+DISABLE_REGISTRATION       = true
+REQUIRE_SIGNIN_VIEW        = false
+REGISTER_EMAIL_CONFIRM     = false
+ENABLE_NOTIFY_MAIL         = false
+ALLOW_ONLY_EXTERNAL_REGISTRATION = false
+
+[mailer]
+ENABLED = false
+
+[log]
+MODE      = file
+LEVEL     = info
+ROOT_PATH = {{ gitea_log_dir }}
+
+[repository]
+ROOT = {{ gitea_home }}/repositories

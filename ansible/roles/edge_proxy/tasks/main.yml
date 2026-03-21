@@ -41,6 +41,14 @@
     mode: "0644"
   notify: Restart edge stack
 
+- name: Generar configuración dinámica de Traefik para Gitea
+  ansible.builtin.template:
+    src: dynamic/gitea.yml.j2
+    dest: "{{ traefik_dynamic_dir }}/gitea.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Crear red Docker para el edge stack
   community.docker.docker_network:
     name: "{{ docker_network_name }}"

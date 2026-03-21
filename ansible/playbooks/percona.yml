@@ -1,0 +1,13 @@
+---
+- name: Setup Percona Server
+  hosts: percona-db
+  become: true
+
+  pre_tasks:
+    - name: Actualizar cache de APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+  roles:
+    - role: percona_setup

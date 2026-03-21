@@ -1,0 +1,25 @@
+---
+gitea_version: "1.25.5"  # Update to latest stable if needed
+gitea_arch: "linux-amd64"
+gitea_user: git
+gitea_group: git
+gitea_home: /var/lib/gitea
+gitea_config_dir: /etc/gitea
+gitea_log_dir: /var/log/gitea
+gitea_port: 3000
+
+# Servidor
+gitea_domain: "gitea.lucaspintos.link"
+gitea_root_url: "https://gitea.lucaspintos.link/"
+
+# Base de datos (deben coincidir con percona_setup)
+gitea_db_type: mysql
+gitea_db_host: "10.2.0.13:3306"
+gitea_db_name: gitea_db
+gitea_db_user: gitea_user
+# gitea_db_password debe definirse en secrets.yml como texto plano
+
+# Usuario admin inicial
+gitea_admin_user: "lpintos"
+gitea_admin_email: "admin@lucaspintos.link"
+# gitea_admin_password debe definirse en secrets.yml
