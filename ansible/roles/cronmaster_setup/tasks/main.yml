@@ -55,20 +55,9 @@
     mode: '0755'
   when: cronmaster_needs_install
 
-- name: Verificar que el asset prebuild existe en el release
-  ansible.builtin.assert:
-    that:
-      - cronmaster_gh_release.json.assets | selectattr('name', 'match', 'cronmaster_.*_prebuild\\.tar\\.gz') | list | length > 0
-    fail_msg: "No se encontró el asset cronmaster_*_prebuild.tar.gz en el release {{ cronmaster_gh_release.json.tag_name }}"
-  when: cronmaster_needs_install
-
 - name: Descargar tarball prebuild de CronMaster {{ cronmaster_gh_release.json.tag_name }}
   ansible.builtin.get_url:
-    url: >-
-      {{ cronmaster_gh_release.json.assets
-         | selectattr('name', 'match', 'cronmaster_.*_prebuild\\.tar\\.gz')
-         | map(attribute='browser_download_url')
-         | first }}
+    url: "https://github.com/fccview/cronmaster/releases/download/{{ cronmaster_gh_release.json.tag_name }}/cronmaster_{{ cronmaster_gh_release.json.tag_name }}_prebuild.tar.gz"
     dest: /tmp/cronmaster_prebuild.tar.gz
     mode: '0644'
   when: cronmaster_needs_install
