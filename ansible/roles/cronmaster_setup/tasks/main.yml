@@ -34,6 +34,7 @@
     url: "https://api.github.com/repos/fccview/cronmaster/releases/latest"
     return_content: true
   register: cronmaster_gh_release
+  check_mode: false
 
 - name: Establecer variables de versión
   ansible.builtin.set_fact:
