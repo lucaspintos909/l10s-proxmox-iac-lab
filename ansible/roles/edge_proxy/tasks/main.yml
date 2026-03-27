@@ -49,6 +49,14 @@
     group: root
     mode: "0644"
 
+- name: Generar configuración dinámica de Traefik para CronMaster
+  ansible.builtin.template:
+    src: dynamic/cronmaster.yml.j2
+    dest: "{{ traefik_dynamic_dir }}/cronmaster.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Crear red Docker para el edge stack
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
