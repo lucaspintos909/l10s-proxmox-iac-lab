@@ -8,6 +8,11 @@ resource "proxmox_virtual_environment_container" "cronmaster" {
 
   unprivileged = true
 
+  # Nesting requerido para systemd 255 (Ubuntu 24.04) en LXC no privilegiado
+  features {
+    nesting = true
+  }
+
   # ── Sistema Operativo ──────────────────────────────────────
   operating_system {
     template_file_id = "local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
