@@ -53,7 +53,6 @@
     path: "{{ cronmaster_install_dir }}"
     state: directory
     mode: '0755'
-  when: cronmaster_needs_install
 
 - name: Descargar tarball prebuild de CronMaster {{ cronmaster_gh_release.json.tag_name }}
   ansible.builtin.get_url:
