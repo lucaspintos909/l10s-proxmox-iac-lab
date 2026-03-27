@@ -1,0 +1,116 @@
+---
+# 0. Instalar dependencias
+- name: Instalar curl
+  ansible.builtin.apt:
+    name: curl
+    state: present
+
+# 1. Instalar Node.js 22 via NodeSource
+- name: Agregar repositorio NodeSource Node.js 22
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+    creates: /etc/apt/sources.list.d/nodesource.list
+
+- name: Instalar Node.js 22
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+
+# 2. Determinar si se necesita instalar o actualizar
+- name: Verificar si existe archivo de versión instalada
+  ansible.builtin.stat:
+    path: "{{ cronmaster_install_dir }}/.version"
+  register: cronmaster_version_file
+
+- name: Leer versión instalada
+  ansible.builtin.slurp:
+    src: "{{ cronmaster_install_dir }}/.version"
+  register: cronmaster_installed_version_raw
+  when: cronmaster_version_file.stat.exists
+
+- name: Obtener última versión de CronMaster desde GitHub
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/fccview/cronmaster/releases/latest"
+    return_content: true
+  register: cronmaster_gh_release
+
+- name: Establecer variables de versión
+  ansible.builtin.set_fact:
+    cronmaster_remote_version: "{{ cronmaster_gh_release.json.tag_name }}"
+    cronmaster_installed_version: >-
+      {{ (cronmaster_installed_version_raw.content | default('') | b64decode | trim)
+         if cronmaster_version_file.stat.exists else '' }}
+
+- name: Establecer si requiere instalación o actualización
+  ansible.builtin.set_fact:
+    cronmaster_needs_install: "{{ cronmaster_installed_version != cronmaster_gh_release.json.tag_name }}"
+
+# 3. Descargar y desplegar
+- name: Crear directorio de instalación {{ cronmaster_install_dir }}
+  ansible.builtin.file:
+    path: "{{ cronmaster_install_dir }}"
+    state: directory
+    mode: '0755'
+  when: cronmaster_needs_install
+
+- name: Verificar que el asset prebuild existe en el release
+  ansible.builtin.assert:
+    that:
+      - cronmaster_gh_release.json.assets | selectattr('name', 'match', 'cronmaster_.*_prebuild\\.tar\\.gz') | list | length > 0
+    fail_msg: "No se encontró el asset cronmaster_*_prebuild.tar.gz en el release {{ cronmaster_gh_release.json.tag_name }}"
+  when: cronmaster_needs_install
+
+- name: Descargar tarball prebuild de CronMaster {{ cronmaster_gh_release.json.tag_name }}
+  ansible.builtin.get_url:
+    url: >-
+      {{ cronmaster_gh_release.json.assets
+         | selectattr('name', 'match', 'cronmaster_.*_prebuild\\.tar\\.gz')
+         | map(attribute='browser_download_url')
+         | first }}
+    dest: /tmp/cronmaster_prebuild.tar.gz
+    mode: '0644'
+  when: cronmaster_needs_install
+
+- name: Extraer CronMaster a {{ cronmaster_install_dir }}
+  ansible.builtin.unarchive:
+    src: /tmp/cronmaster_prebuild.tar.gz
+    dest: "{{ cronmaster_install_dir }}"
+    remote_src: true
+  when: cronmaster_needs_install
+  notify: Restart CronMaster
+
+- name: Guardar versión instalada
+  ansible.builtin.copy:
+    content: "{{ cronmaster_gh_release.json.tag_name }}"
+    dest: "{{ cronmaster_install_dir }}/.version"
+    mode: '0644'
+  when: cronmaster_needs_install
+
+# 4. Configurar .env
+- name: Desplegar archivo .env
+  ansible.builtin.template:
+    src: cronmaster.env.j2
+    dest: "{{ cronmaster_install_dir }}/.env"
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart CronMaster
+
+# 5. Configurar servicio systemd
+- name: Desplegar cronmaster.service
+  ansible.builtin.template:
+    src: cronmaster.service.j2
+    dest: /etc/systemd/system/cronmaster.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart CronMaster
+
+# 6. Habilitar e iniciar servicio
+- name: Habilitar e iniciar el servicio cronmaster
+  ansible.builtin.systemd:
+    name: cronmaster
+    enabled: true
+    state: started
+    daemon_reload: true
