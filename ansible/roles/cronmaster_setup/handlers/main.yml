@@ -1,0 +1,6 @@
+---
+- name: Restart CronMaster
+  ansible.builtin.systemd:
+    name: cronmaster
+    state: restarted
+    daemon_reload: true

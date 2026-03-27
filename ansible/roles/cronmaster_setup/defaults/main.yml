@@ -1,0 +1,3 @@
+---
+cronmaster_install_dir: /opt/cronmaster
+cronmaster_port: 3000

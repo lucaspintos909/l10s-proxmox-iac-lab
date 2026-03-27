@@ -1,0 +1,15 @@
+[Unit]
+Description=CronMaster - Gestión de Cron Jobs vía Web UI
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory={{ cronmaster_install_dir }}
+ExecStart=/usr/bin/node {{ cronmaster_install_dir }}/server.js
+EnvironmentFile={{ cronmaster_install_dir }}/.env
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
