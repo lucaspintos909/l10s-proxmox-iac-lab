@@ -2,6 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,packer,ssh,dotfilessh
 
 # Custom gitignore
+.worktrees/
 secrets.pkrvars.hcl
 variables.pkrvars.hcl
 **/downloaded_iso_path
