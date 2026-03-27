@@ -40,7 +40,7 @@ resource "proxmox_virtual_environment_container" "cronmaster" {
     hostname = "cronmaster"
 
     dns {
-      servers = ["10.2.0.11", "1.1.1.1"]
+      servers = ["10.2.0.11", "1.1.1.1"] # Usando AdGuard como primario
     }
 
     ip_config {
