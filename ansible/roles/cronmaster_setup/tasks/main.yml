@@ -68,6 +68,7 @@
     remote_src: true
   when: cronmaster_needs_install
   notify: Restart CronMaster
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Guardar versión instalada
   ansible.builtin.copy:
