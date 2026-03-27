@@ -66,6 +66,7 @@
     src: /tmp/cronmaster_prebuild.tar.gz
     dest: "{{ cronmaster_install_dir }}"
     remote_src: true
+    extra_opts: ["--strip-components=1"]
   when: cronmaster_needs_install
   notify: Restart CronMaster
   ignore_errors: "{{ ansible_check_mode }}"
