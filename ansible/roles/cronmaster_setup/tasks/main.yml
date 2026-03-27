@@ -39,7 +39,7 @@
   ansible.builtin.set_fact:
     cronmaster_remote_version: "{{ cronmaster_gh_release.json.tag_name }}"
     cronmaster_installed_version: >-
-      {{ (cronmaster_installed_version_raw.content | b64decode | trim)
+      {{ (cronmaster_installed_version_raw.content | default('') | b64decode | trim)
          if cronmaster_version_file.stat.exists else '' }}
 
 - name: Establecer si requiere instalación o actualización
@@ -52,6 +52,13 @@
     path: "{{ cronmaster_install_dir }}"
     state: directory
     mode: '0755'
+  when: cronmaster_needs_install
+
+- name: Verificar que el asset prebuild existe en el release
+  ansible.builtin.assert:
+    that:
+      - cronmaster_gh_release.json.assets | selectattr('name', 'match', 'cronmaster_.*_prebuild\\.tar\\.gz') | list | length > 0
+    fail_msg: "No se encontró el asset cronmaster_*_prebuild.tar.gz en el release {{ cronmaster_gh_release.json.tag_name }}"
   when: cronmaster_needs_install
 
 - name: Descargar tarball prebuild de CronMaster {{ cronmaster_gh_release.json.tag_name }}
