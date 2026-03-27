@@ -1,0 +1,15 @@
+http:
+  routers:
+    cronmaster:
+      rule: "Host(`cronmaster.{{ domain }}`)"
+      entryPoints:
+        - "websecure"
+      service: "cronmaster-service"
+      tls:
+        certResolver: "cloudflare"
+
+  services:
+    cronmaster-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.2.0.14:3000"
