@@ -1,0 +1,42 @@
+---
+# Role: hermes_setup
+# Instala Hermes Agent de Nous Research usando el installer oficial
+
+- name: Instalar dependencias del sistema (git, curl)
+  ansible.builtin.apt:
+    name:
+      - git
+      - curl
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Verificar si Hermes ya está instalado
+  ansible.builtin.stat:
+    path: /usr/local/bin/hermes
+  register: hermes_binary
+
+- name: Instalar Hermes Agent (installer oficial, modo root/FHS)
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup
+  when: not hermes_binary.stat.exists
+  changed_when: true
+  timeout: 600
+
+- name: Agregar /usr/local/bin al PATH del sistema
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/hermes-path.sh
+    line: 'export PATH=$PATH:/usr/local/bin'
+    create: true
+    mode: "0644"
+
+- name: Verificar que hermes sea accesible (recargar profile)
+  ansible.builtin.shell:
+    cmd: . /etc/profile.d/hermes-path.sh && command -v hermes && hermes --version
+  changed_when: false
+  register: hermes_version_check
+
+- name: Mostrar resultado de verificacion
+  ansible.builtin.debug:
+    msg: "Hermes instalado y accesible: {{ hermes_version_check.stdout_lines }}"
+  when: hermes_version_check.stdout_lines | length > 0
